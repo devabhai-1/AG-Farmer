@@ -1,0 +1,10 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "ag_farmer": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

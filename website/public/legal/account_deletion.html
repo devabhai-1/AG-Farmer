@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account &amp; Data Deletion — AG Farmer</title>
+  <style>
+    :root {
+      --deep-sky: #032B43;
+      --primary-sky: #0284C7;
+      --vibrant-sky: #0EA5E9;
+      --light-sky: #38BDF8;
+      --ice-sky: #BAE6FD;
+      --danger: #EF4444;
+      --bg: #F0F9FF;
+      --card: #FFFFFF;
+      --text: #07243B;
+      --muted: #4A728F;
+      --border: #BAE6FD;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+    }
+    nav {
+      background: #021B2B;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(186, 230, 253, 0.2);
+    }
+    nav a {
+      color: #BAE6FD;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: #38BDF8;
+      text-decoration: underline;
+    }
+    header {
+      background: linear-gradient(135deg, #032B43 0%, #0284C7 55%, #0EA5E9 100%);
+      color: white;
+      padding: 48px 20px 38px 20px;
+      text-align: center;
+      position: relative;
+    }
+    header .shimmer-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #BAE6FD, #38BDF8, #0284C7, transparent);
+    }
+    header h1 {
+      margin: 0 0 10px 0;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -0.6px;
+    }
+    header p {
+      margin: 0;
+      font-size: 16px;
+      opacity: 0.95;
+      color: #E0F2FE;
+    }
+    .container {
+      max-width: 820px;
+      margin: 32px auto;
+      padding: 0 20px 60px 20px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 36px;
+      box-shadow: 0 8px 30px rgba(3, 43, 67, 0.08);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    h2 {
+      color: var(--deep-sky);
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 0;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #E0F2FE;
+      padding-bottom: 8px;
+    }
+    p, li {
+      font-size: 15px;
+      color: #1E3A52;
+    }
+    .step-box {
+      background: #F0F9FF;
+      border: 1px solid #BAE6FD;
+      border-radius: 14px;
+      padding: 22px;
+      margin: 20px 0;
+    }
+    .step-box ol {
+      margin: 0;
+      padding-left: 22px;
+    }
+    .step-box li {
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #03446E;
+    }
+    .danger-tag {
+      display: inline-block;
+      background: #FEE2E2;
+      color: var(--danger);
+      font-weight: 800;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      border: 1px solid #FCA5A5;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--deep-sky);
+      margin-bottom: 6px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: #F8FAFC;
+    }
+    button {
+      background: linear-gradient(135deg, #EF4444, #DC2626);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+    }
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      background: #FFFFFF;
+    }
+    a {
+      color: var(--primary-sky);
+      font-weight: 700;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="privacy_policy.html">Privacy Policy</a>
+    <a href="terms_conditions.html">Terms &amp; Conditions</a>
+    <a href="contact_us.html">Contact Us</a>
+    <a href="account_deletion.html" class="active">Account Deletion</a>
+  </nav>
+
+  <header>
+    <h1>Account &amp; Data Deletion</h1>
+    <p>Google Play Data Safety Compliant Permanent Deletion Instructions</p>
+    <div class="shimmer-line"></div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <span class="danger-tag">&#9888; Irreversible Action</span>
+      <h2>Option 1: Instant In-App Deletion (Recommended)</h2>
+      <p>If you have the <strong>AG Farmer</strong> app installed on your phone, you can permanently erase your account and all associated farm records in seconds with real-time Firebase cleanup:</p>
+      
+      <div class="step-box">
+        <ol>
+          <li>Open the <strong>AG Farmer</strong> mobile app.</li>
+          <li>Tap the <strong>Profile (प्रोफाइल)</strong> icon in the bottom navigation bar.</li>
+          <li>Scroll down to the red <strong>Danger Zone (खतरे का क्षेत्र)</strong> section.</li>
+          <li>Tap <strong>"Delete Account &amp; Data" (अकाउंट और सारा डेटा डिलीट करें)</strong>.</li>
+          <li>Confirm the prompt. Your user account, crop tracking nodes, field notes, and chat logs are immediately and permanently erased from Google Firebase servers.</li>
+        </ol>
+      </div>
+
+      <h2 style="margin-top: 32px;">Option 2: Web Deletion Request (App Uninstalled)</h2>
+      <p>If you have uninstalled the app or cannot access your device, submit a verified deletion request below. Our automated backend processes requests within 48 business hours:</p>
+
+      <form onsubmit="event.preventDefault(); alert('अकाउंट हटाने का अनुरोध प्राप्त हुआ। सत्यापन के बाद आपका डेटा 48 घंटे में डिलीट कर दिया जाएगा। (Deletion request received. Data will be purged within 48 hours.)');">
+        <div class="form-group">
+          <label for="email">Registered Email Address or Phone / रजिस्टर्ड ईमेल या फोन नंबर *</label>
+          <input type="text" id="email" required placeholder="जैसे: kisan@example.com या 98xxxxxxxx">
+        </div>
+        <div class="form-group">
+          <label for="reason">Reason for Deletion (Optional) / हटाने का कारण</label>
+          <textarea id="reason" rows="2" placeholder="फसल सत्र समाप्त / अन्य कारण..."></textarea>
+        </div>
+        <button type="submit">Submit Permanent Deletion Request / डेटा मिटाने का अनुरोध भेजें</button>
+      </form>
+
+      <h2 style="margin-top: 32px;">What Data is Deleted?</h2>
+      <ul>
+        <li><strong>Account Profile:</strong> Name, phone number, email address, and Firebase Auth UID.</li>
+        <li><strong>Field Data:</strong> All crop tracks, custom schedules, sowing logs, and crop yield notes.</li>
+        <li><strong>Chat History:</strong> All AI conversation history and custom query tokens.</li>
+      </ul>
+      <p style="font-size: 13.5px; color: #64748B;"><em>Note: Any active Google Play subscriptions must be canceled directly in Google Play Store settings to prevent Google from recurring charges.</em></p>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 AG Farmer. All rights reserved. • Package: com.agfarmer.app
+  </footer>
+
+  <script src="/plans-strip.js"></script>
+</body>
+</html>

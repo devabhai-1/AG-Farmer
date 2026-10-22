@@ -1,0 +1,26 @@
+---
+description: Chat and course GPT context must never mix across chats, courses, or users
+alwaysApply: true
+---
+
+# AI context isolation (hard)
+
+GPT / Gemini ko sirf **isi login user** ka **ek hi thread** jaaye.
+
+- **Chat:** `users/{uid}/ai/threads/chat_{sessionId}` (ya `main`). Dusri chat ka sessionId mat padho, mat merge karo.
+- **Course:** `users/{uid}/ai/threads/course_{cropId}` only. `course_afim` kabhi `course_lasun` ya kisi chat se mat milao. Course window bada rakho (season + months + days + recent turns); chat window chhota.
+- **Users:** doosre uid / email / IP-guest box kabhi mat kholo. Context email sirf JWT user se, body `email` se nahi.
+- Client `history` GPT ko **mat bhejo, mat use karo**. Window sirf usi thread ki RTDB se.
+- Guest (no uid/email): khali window. Shared IP memory GPT me nahi.
+- Course request me cropId na ho, ya chat me sessionId na ho: khali window, `main` me dump mat karo.
+
+```js
+// BAD — mixes chats / users
+getWindow({ uid, mode: 'chat' })
+history = req.body.history
+getWindow({ email: data.email }) // untrusted
+
+// GOOD
+getWindow({ uid: jwt.uid, mode: 'chat', sessionId })
+getWindow({ uid: jwt.uid, mode: 'course', cropId })
+```

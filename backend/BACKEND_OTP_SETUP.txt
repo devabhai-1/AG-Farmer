@@ -1,0 +1,34 @@
+# Backend OTP — no Firebase client keys in the APK
+
+## App API
+POST /api
+{ "action": "auth.otp.send", "phone": "9876543210" }
+→ { requestId, phone, expiresInSec, debugOtp? }
+
+POST /api
+{ "action": "auth.otp.verify", "phone": "9876543210", "otp": "123456", "requestId": "..." }
+→ { token, uid, phone, profile }
+
+Then all calls:
+Authorization: Bearer <token>
+
+## .env (server only)
+JWT_SECRET=...
+SMS_PROVIDER=log          # console OTP until SMS vendor ready
+# SMS_PROVIDER=msg91
+# MSG91_AUTH_KEY=...
+# MSG91_SENDER=AGFMRR
+
+GOOGLE_APPLICATION_CREDENTIALS=./serviceAccountKey.json
+
+## Firebase Console (must)
+Realtime Database → Rules → publish:
+{ "rules": { ".read": false, ".write": false } }
+
+Storage rules: keep locked (repo: backend/firebase/storage.rules)
+
+## Never put in APK
+- FIREBASE_API_KEY / google-services.json (not needed for this OTP mode)
+- JWT_SECRET
+- serviceAccountKey.json
+- MSG91 / Twilio secrets

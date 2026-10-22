@@ -1,0 +1,76 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+**/ios/Pods/
+
+# Build outputs
+build/
+**/build/
+dist/
+.next/
+.vite/
+*.apk
+*.aab
+*.apks
+*.ipa
+*.exe
+*.dll
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Flutter / Android local
+**/android/local.properties
+**/android/.gradle/
+**/.cxx/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/.symlinks/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# Secrets — NEVER commit
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+**/serviceAccountKey.json
+**/google-services.json
+**/GoogleService-Info.plist
+**/key.properties
+**/*.jks
+**/*.keystore
+!**/*.keystore.example
+
+# Large / recovered junk
+_aab_extract_12/
+_tools/
+_phone_apk/
+_android_custom_bak/
+_history_all_dart/
+_RESTORE_*/
+backups/
+**/chatterbox/
+*.zip
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+.env.bak
+**/.env.bak
+**/*.env.bak
+

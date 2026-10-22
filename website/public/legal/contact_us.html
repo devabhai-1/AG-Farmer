@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us — AG Farmer</title>
+  <style>
+    :root {
+      --deep-sky: #032B43;
+      --primary-sky: #0284C7;
+      --vibrant-sky: #0EA5E9;
+      --light-sky: #38BDF8;
+      --ice-sky: #BAE6FD;
+      --bg: #F0F9FF;
+      --card: #FFFFFF;
+      --text: #07243B;
+      --muted: #4A728F;
+      --border: #BAE6FD;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+    }
+    nav {
+      background: #021B2B;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(186, 230, 253, 0.2);
+    }
+    nav a {
+      color: #BAE6FD;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+    nav a:hover, nav a.active {
+      color: #38BDF8;
+      text-decoration: underline;
+    }
+    header {
+      background: linear-gradient(135deg, #032B43 0%, #0284C7 55%, #0EA5E9 100%);
+      color: white;
+      padding: 48px 20px 38px 20px;
+      text-align: center;
+      position: relative;
+    }
+    header .shimmer-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #BAE6FD, #38BDF8, #0284C7, transparent);
+    }
+    header h1 {
+      margin: 0 0 10px 0;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -0.6px;
+    }
+    header p {
+      margin: 0;
+      font-size: 16px;
+      opacity: 0.95;
+      color: #E0F2FE;
+    }
+    .container {
+      max-width: 880px;
+      margin: 32px auto;
+      padding: 0 20px 60px 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 680px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 32px;
+      box-shadow: 0 8px 30px rgba(3, 43, 67, 0.08);
+      border: 1px solid var(--border);
+    }
+    h2 {
+      color: var(--deep-sky);
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 0;
+      margin-bottom: 14px;
+      border-bottom: 2px solid #E0F2FE;
+      padding-bottom: 8px;
+    }
+    p, li {
+      font-size: 14.5px;
+      color: #1E3A52;
+    }
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+    .contact-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0284C7, #0EA5E9);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-right: 14px;
+      flex-shrink: 0;
+    }
+    .contact-info strong {
+      display: block;
+      color: var(--deep-sky);
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .contact-info span, .contact-info a {
+      color: #334155;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .contact-info a:hover {
+      color: var(--primary-sky);
+      text-decoration: underline;
+    }
+    .badge {
+      display: inline-block;
+      background: #E0F2FE;
+      color: #03446E;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--deep-sky);
+      margin-bottom: 6px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: #F8FAFC;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-sky);
+      background: #FFFFFF;
+    }
+    button {
+      background: linear-gradient(135deg, #0284C7, #0EA5E9);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.4);
+    }
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      background: #FFFFFF;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="privacy_policy.html">Privacy Policy</a>
+    <a href="terms_conditions.html">Terms &amp; Conditions</a>
+    <a href="contact_us.html" class="active">Contact Us</a>
+    <a href="account_deletion.html">Account Deletion</a>
+  </nav>
+
+  <header>
+    <h1>Contact AG Farmer Support</h1>
+    <p>We are here to assist farmers, growers, and agribusiness partners</p>
+    <div class="shimmer-line"></div>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Contact Details -->
+      <div class="card">
+        <span class="badge">Official Developer Channels</span>
+        <h2>Get in Touch</h2>
+        <p>Have inquiries regarding crop disease analysis, premium subscriptions, or app functionality? Reach out through our verified developer channels:</p>
+
+        <div class="contact-item">
+          <div class="contact-icon">&#9993;</div>
+          <div class="contact-info">
+            <strong>Customer &amp; Technical Support Email</strong>
+            <a href="mailto:ag.farmer.mail@gmail.com">ag.farmer.mail@gmail.com</a>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">&#128187;</div>
+          <div class="contact-info">
+            <strong>Application Identifier</strong>
+            <span>AG Farmer (<code>com.agfarmer.app</code>)</span>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">&#128100;</div>
+          <div class="contact-info">
+            <strong>AG Farmer</strong>
+            <span>Operated by Apex Global Team LLC</span>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">&#128205;</div>
+          <div class="contact-info">
+            <strong>Registered Address</strong>
+            <span>Apex Global Team LLC, 7533 S Center View Ct Ste 210, West Jordan, UT 84084-5527, United States (US)</span>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">&#127760;</div>
+          <div class="contact-info">
+            <strong>Website</strong>
+            <a href="https://ag-farmer.com/">https://ag-farmer.com/</a>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">&#9201;</div>
+          <div class="contact-info">
+            <strong>Response Turnaround Time</strong>
+            <span>Within 24 to 48 business hours (Mon-Sat, 9:00 AM - 6:00 PM IST)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grievance Officer & Quick Message -->
+      <div class="card">
+        <span class="badge">Statutory Compliance</span>
+        <h2>Grievance Redressal</h2>
+        <p>In accordance with Indian Information Technology Rules and Google Play Store Developer Guidelines, any legal, content, or privacy grievances may be directed to:</p>
+
+        <p style="background: #F0F9FF; border: 1px solid #BAE6FD; padding: 14px; border-radius: 12px; font-size: 13.5px;">
+          <strong>App:</strong> AG Farmer (AI Agriculture Assistant)<br>
+          <strong>Operated by:</strong> Apex Global Team LLC<br>
+          <strong>Name:</strong> Grievance Redressal Officer<br>
+          <strong>Email:</strong> <a href="mailto:ag.farmer.mail@gmail.com?subject=Grievance%20Redressal">ag.farmer.mail@gmail.com</a><br>
+          <strong>Payments:</strong> Indian payment gateway account (INR). पेमेंट भारतीय गेटवे अकाउंट से होगा।<br>
+          <strong>Address:</strong> 7533 S Center View Ct Ste 210, West Jordan, UT 84084-5527, United States (US)<br>
+          <strong>Acknowledgement Time:</strong> Within 24 hours<br>
+          <strong>Resolution Time:</strong> Within 15 days of receipt
+        </p>
+
+        <h2 style="margin-top: 24px;">Send a Direct Message</h2>
+        <form onsubmit="event.preventDefault(); alert('धन्यवाद किसान भाई! आपका संदेश AG Farmer टीम को प्राप्त हो गया है। हम 24 घंटे में संपर्क करेंगे। (Thank you! Your message has been received.)');">
+          <div class="form-group">
+            <label for="name">Your Name / आपका नाम *</label>
+            <input type="text" id="name" required placeholder="जैसे: रामकिशन जी / Ramkishan">
+          </div>
+          <div class="form-group">
+            <label for="email">Email / Phone *</label>
+            <input type="text" id="email" required placeholder="farmer@example.com / 98xxxxxxxx">
+          </div>
+          <div class="form-group">
+            <label for="subject">Category / विषय</label>
+            <select id="subject">
+              <option>Crop Guidance &amp; Disease Issue (फसल व रोग सलाह)</option>
+              <option>Subscription / Payment Support (प्लान व भुगतान)</option>
+              <option>Account &amp; Login Issue (अकाउंट व लॉगिन)</option>
+              <option>Feedback / Suggestion (सुझाव)</option>
+              <option>Other Grievance (अन्य)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="msg">Message / संदेश *</label>
+            <textarea id="msg" rows="3" required placeholder="कृपया अपनी समस्या या सवाल यहाँ लिखें..."></textarea>
+          </div>
+          <button type="submit">Submit Message / संदेश भेजें</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 AG Farmer. All rights reserved. • Dedicated to Farmer Prosperity &amp; Sustainable Agriculture.
+  </footer>
+
+  <script src="/plans-strip.js"></script>
+</body>
+</html>

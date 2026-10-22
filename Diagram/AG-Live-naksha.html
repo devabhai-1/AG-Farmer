@@ -1,0 +1,376 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AG Live — आर्किटेक्चर</title>
+  <style>
+    :root {
+      --ink:#f0f9ff; --muted:#9ec9e6; --line:#1b4e74; --paper:#082236;
+      --deep:#031626; --card:#0e314d; --ice:#bae6fd; --sky:#38bdf8;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; background:var(--deep); color:var(--ink); font-family:"Segoe UI",sans-serif; }
+    ::selection { background:#0369a1; color:#fff; }
+    .bar {
+      position:sticky; top:0; z-index:30;
+      background:rgba(3,22,38,.94);
+      border-bottom:1px solid var(--line);
+      padding:14px 18px 12px;
+    }
+    .bar h1 { margin:0 0 4px; font-size:22px; font-weight:600; letter-spacing:.01em; }
+    .bar h1::before { content:""; display:inline-block; width:8px; height:8px; margin-right:8px; background:var(--sky); vertical-align:middle; }
+    .bar p { margin:0 0 10px; color:var(--muted); font-size:12px; }
+    .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .ticks { margin-top:8px; }
+    .ticks label {
+      font-size:12px; letter-spacing:.02em;
+      display:inline-flex; gap:6px; align-items:center;
+      background:#062033; border:1px solid var(--line); border-radius:999px;
+      padding:5px 10px; cursor:pointer; color:var(--muted);
+    }
+    .ticks label:has(input:checked) { border-color:var(--sky); color:var(--ink); background:#0b3554; }
+    input[type=checkbox] { accent-color:#0284c7; }
+    button {
+      background:#062033; color:var(--ink); border:1px solid var(--sky);
+      border-radius:999px; padding:7px 14px; font:inherit; font-size:13px; cursor:pointer;
+    }
+    button:hover { background:#0b3554; }
+    #zlab { color:var(--ice); font-size:13px; min-width:44px; letter-spacing:.04em; }
+    .stage { padding:22px 16px 56px; }
+    .board { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr); gap:18px; align-items:start; }
+    .sheet, .side {
+      background:var(--paper);
+      border:12px solid #021018;
+      box-shadow:inset 0 0 0 1px var(--sky), inset 0 0 0 5px #041e33;
+      padding:22px 18px 14px;
+    }
+    .side { position:sticky; top:148px; max-height:calc(100vh - 164px); overflow:auto; }
+    h2 { margin:0 0 6px; font-size:18px; font-weight:600; color:var(--ice); }
+    .sub { color:var(--muted); font-size:12px; margin:0 0 12px; line-height:1.45; }
+    .layer { border:1px solid var(--line); background:#062033; border-radius:12px; padding:14px 14px 12px; }
+    .layer h3 { margin:0 0 10px; font-size:11px; color:var(--sky); letter-spacing:.16em; font-weight:650; }
+    .stem { height:22px; text-align:center; color:var(--sky); font-size:13px; line-height:22px; }
+    .nodes { display:flex; flex-wrap:wrap; gap:8px; }
+    .node { flex:1 1 150px; border:1px solid #24638f; background:var(--card); border-radius:10px; padding:10px 12px; min-width:130px; }
+    .node b { display:block; font-size:14px; font-weight:650; }
+    .node span, .node small { display:block; color:var(--muted); font-size:12px; margin-top:3px; line-height:1.4; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .col { border:1px solid var(--line); border-radius:12px; padding:10px; background:#041e33; }
+    .col h4 { margin:0 0 8px; font-size:13px; color:var(--ice); }
+    .chip { border:1px solid #1b4e74; border-radius:8px; padding:8px 10px; margin:0 0 6px; font-size:12px; background:#062033; line-height:1.45; }
+    .chip b { color:#fff; }
+    code { font-family:Consolas,monospace; font-size:11px; color:#e0f2fe; background:#041526; border-radius:4px; padding:1px 4px; }
+    .card { border:1px solid #24638f; background:#041e33; border-radius:12px; padding:10px; margin:0 0 10px; }
+    .card .top { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+    .card .top b { font-size:14px; }
+    .card .price { color:var(--ice); font-size:13px; }
+    .nums { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+    .num { background:#062033; border:1px solid #16466a; border-radius:8px; padding:6px; }
+    .num strong { display:block; font-size:18px; line-height:1.1; color:#fff; }
+    .num em { display:block; font-style:normal; color:var(--muted); font-size:10px; margin-top:2px; }
+    .api { display:flex; flex-wrap:wrap; gap:5px; }
+    .api i { font-style:normal; font-size:11px; border:1px solid #1b4e74; border-radius:999px; padding:3px 8px; color:#d7eefe; background:#041526; }
+    .fine { list-style:none; margin:10px 0 0; padding:0; }
+    .fine li { border-left:1px solid #38bdf8; margin:0 0 0 4px; padding:5px 0 5px 12px; font-size:12.5px; color:#d7eefe; line-height:1.45; }
+    .fine b { color:#fff; }
+    .fine ul { list-style:none; margin:3px 0 0; padding:0; }
+    .fine ul li { border-left-color:#1b4e74; color:#b9d7ea; }
+    table { width:100%; border-collapse:collapse; font-size:12px; margin:6px 0 10px; }
+    th, td { border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+    th { background:#0b3554; color:var(--ice); }
+    .rail { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .rail div { border:1px solid #24638f; background:var(--card); border-radius:10px; padding:8px 10px; font-size:12px; line-height:1.4; color:var(--muted); }
+    .rail strong { display:block; font-size:13px; color:#fff; margin-bottom:2px; }
+    @media (max-width:720px) {
+      .board { grid-template-columns:1fr; }
+      .side { position:static; max-height:none; order:-1; }
+      .split, .rail { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <h1>AG Live · मॉडल आर्किटेक्चर</h1>
+    <p>लेयर ऊपर से नीचे। दाईं तरफ इस ऐप की अपनी चैट सीमा टिकी रहती है। यह AG Farmer की सीमा नहीं है।</p>
+    <div class="row">
+      <button type="button" id="zin">ज़ूम +</button>
+      <button type="button" id="zout">ज़ूम −</button>
+      <button type="button" id="zreset">100%</button>
+      <span id="zlab">100%</span>
+      <button type="button" id="full">फुल स्क्रीन</button>
+    </div>
+    <div class="row ticks">
+      <label><input type="checkbox" id="all" checked /> सब टिक</label>
+      <label><input type="checkbox" data-sec="layout" checked /> Layout</label>
+      <label><input type="checkbox" data-sec="router" checked /> Router</label>
+      <label><input type="checkbox" data-sec="models" checked /> मॉडल</label>
+      <label><input type="checkbox" data-sec="limits" checked /> चैट सीमा</label>
+      <label><input type="checkbox" data-sec="live" checked /> Live</label>
+      <label><input type="checkbox" data-sec="api" checked /> API</label>
+      <label><input type="checkbox" data-sec="data" checked /> डेटा</label>
+    </div>
+  </div>
+
+  <div id="stage" class="stage">
+    <div class="board">
+      <div class="sheet">
+        <div data-block="limits">
+          <div class="layer">
+            <h3>L · चैट सीमा, हर प्लान</h3>
+            <div class="rail">
+              <div><strong>मेहमान</strong>चैट 5 · आवाज़ 2 · वीडियो 1</div>
+              <div><strong>मुफ़्त</strong>चैट 20 · मजबूत 0 · आवाज़ 5 जिंदगी · फोटो 5 · वीडियो 0</div>
+              <div><strong>₹199</strong>चैट 99999 · मजबूत 2 · डीप 4/महीना · आवाज़ 0 · फोटो 99999</div>
+              <div><strong>₹599</strong>चैट 83 · मजबूत 3 · डीप 1/दिन · आवाज़ 15 · फोटो 0</div>
+              <div><strong>₹1250 सुपर</strong>चैट 99999 · मजबूत 15 · डीप 4/दिन · आवाज़ 99999 · वीडियो 999</div>
+              <div><strong>₹13500</strong>चैट 1650 · मजबूत 150 · डीप 40/दिन · आवाज़ 250 · फोटो 200 · वीडियो 10</div>
+            </div>
+            <p class="sub" style="margin-top:8px">याद सब प्लान पर एक जैसी: 60 टर्न। 99999 कोड की ऊँची संख्या है।</p>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="layout">
+          <div class="layer">
+            <h3>L0 · CLIENT</h3>
+            <div class="nodes">
+              <div class="node"><b>Android</b><span><code>com.agfarmer.live</code> · 6.0.0+6</span></div>
+              <div class="node"><b>Website</b><span>AG Live/website</span></div>
+            </div>
+          </div>
+          <div class="stem">↓</div>
+          <div class="layer">
+            <h3>L0b · HOME के तीन दरवाजे · छोटी चीज़</h3>
+            <ul class="fine">
+              <li><b>लॉगिन के पहले</b>
+                <ul>
+                  <li>लॉगिन, रजिस्टर, भूला पासवर्ड</li>
+                  <li>Google के बाद प्रोफाइल पूरी</li>
+                </ul>
+              </li>
+              <li><b>लाइव कैमरा</b>
+                <ul>
+                  <li>लॉग-इन हो और प्लान सुपर या डिस्ट्रीब्यूटर न हो तो प्लान शीट</li>
+                  <li>गेस्ट एक वीडियो ट्रायल से अंदर</li>
+                  <li>स्क्रीन <code>video_call_screen.dart</code></li>
+                </ul>
+              </li>
+              <li><b>फोटो जाँच</b>
+                <ul>
+                  <li>पत्ती की फोटो <code>photo_check_screen.dart</code></li>
+                  <li>वही <code>chat</code> इमेज मॉडल पर</li>
+                </ul>
+              </li>
+              <li><b>चैट और आवाज़</b>
+                <ul>
+                  <li>हब में टाइप चैट</li>
+                  <li>आवाज़ <code>voice_live_screen.dart</code></li>
+                  <li>प्रोफाइल, सब्सक्रिप्शन स्क्रीन, क्रेडिट कोड</li>
+                </ul>
+              </li>
+              <li><b>इस ऐप में नहीं</b> — पाँच टैब, फसल कोर्स, जानकारी का बोलना, Razorpay चेकआउट</li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="router">
+          <div class="layer">
+            <h3>L1 · ROUTER</h3>
+            <div class="node"><b>POST action</b><span>अलग प्रोसेस <code>ag-live-api</code>। Razorpay action इस सर्वर पर नहीं।</span></div>
+            <div class="nodes" style="margin-top:8px">
+              <div class="node"><b>chat</b><span>डिफॉल्ट OpenAI</span></div>
+              <div class="node"><b>voice.realtime.session</b><span>आवाज़ और वीडियो</span></div>
+              <div class="node"><b>credit.redeem</b><span>कोड से प्लान</span></div>
+            </div>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="models">
+          <div class="layer">
+            <h3>L2 · कौन सा मॉडल</h3>
+            <p class="sub">चैट पहले AG Expert। मजबूत कोटा खत्म हो तो कम मॉडल। Live हमेशा Gemini।</p>
+            <div class="split">
+              <div class="col">
+                <h4>AG Expert · पहले यह</h4>
+                <div class="chip"><b>मजबूत</b><br><code>gpt-5-mini</code></div>
+                <div class="chip"><b>कम</b><br><code>gpt-5-nano</code></div>
+                <div class="chip"><b>डीप</b><br><code>gpt-4o</code></div>
+                <div class="chip"><b>फोटो</b><br><code>gpt-5.4-mini</code> / <code>gpt-6-luna</code></div>
+              </div>
+              <div class="col">
+                <h4>AG High · दूसरा</h4>
+                <div class="chip"><b>मजबूत</b><br><code>gemini-3.6-flash</code></div>
+                <div class="chip"><b>कम</b><br><code>gemini-3.1-flash-lite</code></div>
+                <div class="chip"><b>डीप</b><br><code>gemini-3.1-pro-preview</code></div>
+                <div class="chip"><b>फोटो</b><br><code>gemini-3.6-flash</code> / <code>gemini-3.1-flash-lite</code></div>
+              </div>
+            </div>
+            <div class="nodes" style="margin-top:8px">
+              <div class="node"><b>आवाज़ और कैमरा</b><span><code>gemini-3.8-live</code> · Kore</span></div>
+              <div class="node"><b>Live आउटपुट टोकन</b><span>आवाज़ 180 · वीडियो 160</span></div>
+            </div>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="live">
+          <div class="layer">
+            <h3>L3 · LIVE रास्ता</h3>
+            <div class="nodes">
+              <div class="node"><b>कोटा कटता है</b><span>हर आवाज़ consumeVoice, हर वीडियो consumeVideo</span></div>
+              <div class="node"><b>टोकन उम्र</b><span>वीडियो 10 मिनट · आवाज़ 30 मिनट</span></div>
+              <div class="node"><b>नई सेशन उम्र</b><span>वीडियो 5 मिनट · आवाज़ 2 मिनट</span></div>
+              <div class="node"><b>आवाज़ तार</b><span>अंदर 16 kHz · बाहर 24 kHz · NO_INTERRUPTION</span></div>
+            </div>
+            <ul class="fine">
+              <li><b>आवाज़ तार</b> — अंदर 16000 Hz PCM, बाहर 24000 Hz</li>
+              <li><b>आउटपुट टोकन</b> — आवाज़ 180, वीडियो 160। AG Farmer का 8192 यहाँ नहीं</li>
+              <li><b>बोलना</b> — खामोशी 1100 ms और <code>NO_INTERRUPTION</code></li>
+              <li><b>उम्र</b> — वीडियो टोकन 10 मिनट, आवाज़ 30 मिनट। नई सेशन वीडियो 5, आवाज़ 2 मिनट</li>
+              <li><b>कोटा</b> — हर कॉल पर कटता है। ब्लॉक हो तो 403, सेशन नहीं बनता</li>
+              <li><b>याद</b> — प्लान के साथ नहीं बदलती। सब पर आखिरी 60 टर्न, 36000 अक्षर</li>
+              <li><b>सीमा-बंद फ्लैग</b> — इस सर्वर पर नहीं। AG Farmer वाली LIVE_LIMITS_OFF यहाँ लागू नहीं</li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="api">
+          <div class="layer">
+            <h3>L4 · ACTION</h3>
+            <div class="api">
+              <i>health</i><i>config</i><i>auth.login</i><i>auth.register</i><i>auth.google</i><i>auth.otp.send</i><i>auth.otp.verify</i>
+              <i>chat</i><i>chat.sync</i><i>chat.restore</i><i>chat.limits</i><i>ai.quota</i>
+              <i>voice.realtime.session</i>
+              <i>jankari.list</i><i>jankari.search</i>
+              <i>catalog.plans</i><i>catalog.crops</i>
+              <i>credit.redeem</i><i>credit.status</i>
+              <i>weather.forecast</i><i>support.create</i><i>users.me</i>
+              <i>admin.chat.limits.set</i><i>admin.users</i><i>admin.subscription</i>
+            </div>
+            <p class="sub">बिलिंग और jankari.tts इस लिस्ट में नहीं।</p>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="data">
+          <div class="layer">
+            <h3>L5 · डेटा</h3>
+            <div class="nodes">
+              <div class="node"><b>Firebase</b><span>Auth और users/{uid}</span></div>
+              <div class="node"><b>users/{uid}/ai</b><span>चैट याद, 60 टर्न</span></div>
+              <div class="node"><b>स्टोरेज</b><span>फोटो जाँच</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side" data-block="limits">
+        <h2>चैट सीमा</h2>
+        <p class="sub">यह AG Live की <code>chat_limits</code> है। 99999 कोड में बिना रोके चलाने की ऊँची संख्या है। याद प्लान के साथ नहीं बदलती: सब पर 60 टर्न।</p>
+
+        <div class="card">
+          <div class="top"><b>मेहमान</b><span class="price">बिना लॉगिन</span></div>
+          <div class="nums">
+            <div class="num"><strong>5</strong><em>चैट</em></div>
+            <div class="num"><strong>2</strong><em>आवाज़</em></div>
+            <div class="num"><strong>1</strong><em>वीडियो ट्रायल</em></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>मुफ़्त</b><span class="price">free</span></div>
+          <div class="nums">
+            <div class="num"><strong>20</strong><em>चैट</em></div>
+            <div class="num"><strong>0</strong><em>मजबूत</em></div>
+            <div class="num"><strong>0</strong><em>डीप</em></div>
+            <div class="num"><strong>5</strong><em>आवाज़, जिंदगी</em></div>
+            <div class="num"><strong>5</strong><em>फोटो</em></div>
+            <div class="num"><strong>0</strong><em>वीडियो</em></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>₹199</b><span class="price">advanced</span></div>
+          <div class="nums">
+            <div class="num"><strong>99999</strong><em>चैट</em></div>
+            <div class="num"><strong>2</strong><em>मजबूत</em></div>
+            <div class="num"><strong>4</strong><em>डीप / महीना</em></div>
+            <div class="num"><strong>0</strong><em>आवाज़</em></div>
+            <div class="num"><strong>99999</strong><em>फोटो</em></div>
+            <div class="num"><strong>0</strong><em>वीडियो</em></div>
+          </div>
+          <p class="sub">rollover नहीं। लाइव कैमरा इस प्लान पर नहीं।</p>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>₹599</b><span class="price">all</span></div>
+          <div class="nums">
+            <div class="num"><strong>83</strong><em>चैट</em></div>
+            <div class="num"><strong>3</strong><em>मजबूत</em></div>
+            <div class="num"><strong>1</strong><em>डीप / दिन</em></div>
+            <div class="num"><strong>15</strong><em>आवाज़ / दिन</em></div>
+            <div class="num"><strong>0</strong><em>फोटो</em></div>
+            <div class="num"><strong>0</strong><em>वीडियो</em></div>
+          </div>
+          <p class="sub">rollover हाँ। लाइव कैमरा नहीं।</p>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>₹1250 सुपर</b><span class="price">super</span></div>
+          <div class="nums">
+            <div class="num"><strong>99999</strong><em>चैट</em></div>
+            <div class="num"><strong>15</strong><em>मजबूत</em></div>
+            <div class="num"><strong>4</strong><em>डीप / दिन</em></div>
+            <div class="num"><strong>99999</strong><em>आवाज़</em></div>
+            <div class="num"><strong>99999</strong><em>फोटो</em></div>
+            <div class="num"><strong>999</strong><em>वीडियो</em></div>
+          </div>
+          <p class="sub">लाइव कैमरा हाँ। rollover नहीं।</p>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>₹13500</b><span class="price">distributor</span></div>
+          <div class="nums">
+            <div class="num"><strong>1650</strong><em>चैट</em></div>
+            <div class="num"><strong>150</strong><em>मजबूत</em></div>
+            <div class="num"><strong>40</strong><em>डीप / दिन</em></div>
+            <div class="num"><strong>250</strong><em>आवाज़ / दिन</em></div>
+            <div class="num"><strong>200</strong><em>फोटो</em></div>
+            <div class="num"><strong>10</strong><em>वीडियो</em></div>
+          </div>
+          <p class="sub">लाइव कैमरा हाँ। rollover हाँ। याद फिर भी 60 टर्न।</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <script>
+    const stage = document.getElementById('stage');
+    const zlab = document.getElementById('zlab');
+    const all = document.getElementById('all');
+    const boxes = [...document.querySelectorAll('input[data-sec]')];
+    let z = 1;
+    function paintZoom() {
+      stage.style.zoom = String(z);
+      zlab.textContent = Math.round(z * 100) + '%';
+    }
+    document.getElementById('zin').onclick = () => { z = Math.min(2.2, Math.round((z + 0.1) * 10) / 10); paintZoom(); };
+    document.getElementById('zout').onclick = () => { z = Math.max(0.5, Math.round((z - 0.1) * 10) / 10); paintZoom(); };
+    document.getElementById('zreset').onclick = () => { z = 1; paintZoom(); };
+    document.getElementById('full').onclick = () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    };
+    function apply() {
+      const on = new Set(boxes.filter((b) => b.checked).map((b) => b.dataset.sec));
+      document.querySelectorAll('[data-block]').forEach((el) => { el.hidden = !on.has(el.dataset.block); });
+      all.checked = boxes.every((b) => b.checked);
+    }
+    all.onchange = () => { boxes.forEach((b) => { b.checked = all.checked; }); apply(); };
+    boxes.forEach((b) => { b.onchange = apply; });
+  </script>
+</body>
+</html>

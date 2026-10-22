@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AG Farmer — आर्किटेक्चर</title>
+  <style>
+    :root {
+      --ink:#f0f9ff; --muted:#9ec9e6; --line:#1b4e74; --paper:#082236;
+      --deep:#031626; --card:#0e314d; --ice:#bae6fd; --sky:#38bdf8;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; background:var(--deep); color:var(--ink); font-family:"Segoe UI",sans-serif; }
+    ::selection { background:#0369a1; color:#fff; }
+    .bar {
+      position:sticky; top:0; z-index:30;
+      background:rgba(3,22,38,.94);
+      border-bottom:1px solid var(--line);
+      padding:14px 18px 12px;
+    }
+    .bar h1 { margin:0 0 4px; font-size:22px; font-weight:600; letter-spacing:.01em; }
+    .bar h1::before { content:""; display:inline-block; width:8px; height:8px; margin-right:8px; background:var(--sky); vertical-align:middle; }
+    .bar p { margin:0 0 10px; color:var(--muted); font-size:12px; }
+    .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .ticks { margin-top:8px; }
+    .ticks label {
+      font-size:12px; letter-spacing:.02em;
+      display:inline-flex; gap:6px; align-items:center;
+      background:#062033; border:1px solid var(--line); border-radius:999px;
+      padding:5px 10px; cursor:pointer; color:var(--muted);
+    }
+    .ticks label:has(input:checked) { border-color:var(--sky); color:var(--ink); background:#0b3554; }
+    input[type=checkbox] { accent-color:#0284c7; }
+    button {
+      background:#062033; color:var(--ink); border:1px solid var(--sky);
+      border-radius:999px; padding:7px 14px; font:inherit; font-size:13px; cursor:pointer;
+    }
+    button:hover { background:#0b3554; }
+    #zlab { color:var(--ice); font-size:13px; min-width:44px; letter-spacing:.04em; }
+    .stage { padding:22px 16px 56px; }
+    .board { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr); gap:18px; align-items:start; }
+    .sheet, .side {
+      background:var(--paper);
+      border:12px solid #021018;
+      box-shadow:inset 0 0 0 1px var(--sky), inset 0 0 0 5px #041e33;
+      padding:22px 18px 14px;
+    }
+    .side { position:sticky; top:148px; max-height:calc(100vh - 164px); overflow:auto; }
+    h2 { margin:0 0 6px; font-size:18px; font-weight:600; color:var(--ice); }
+    .sub { color:var(--muted); font-size:12px; margin:0 0 12px; line-height:1.45; }
+    .layer { border:1px solid var(--line); background:#062033; border-radius:12px; padding:14px 14px 12px; }
+    .layer h3 { margin:0 0 10px; font-size:11px; color:var(--sky); letter-spacing:.16em; font-weight:650; }
+    .stem { height:22px; text-align:center; color:var(--sky); font-size:13px; line-height:22px; }
+    .nodes { display:flex; flex-wrap:wrap; gap:8px; }
+    .node { flex:1 1 150px; border:1px solid #24638f; background:var(--card); border-radius:10px; padding:10px 12px; min-width:130px; }
+    .node b { display:block; font-size:14px; font-weight:650; }
+    .node span, .node small { display:block; color:var(--muted); font-size:12px; margin-top:3px; line-height:1.4; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .col { border:1px solid var(--line); border-radius:12px; padding:10px; background:#041e33; }
+    .col h4 { margin:0 0 8px; font-size:13px; color:var(--ice); }
+    .chip { border:1px solid #1b4e74; border-radius:8px; padding:8px 10px; margin:0 0 6px; font-size:12px; background:#062033; line-height:1.45; }
+    .chip b { color:#fff; }
+    code { font-family:Consolas,monospace; font-size:11px; color:#e0f2fe; background:#041526; border-radius:4px; padding:1px 4px; }
+    .card { border:1px solid #24638f; background:#041e33; border-radius:12px; padding:10px; margin:0 0 10px; }
+    .card .top { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+    .card .top b { font-size:14px; }
+    .card .price { color:var(--ice); font-size:13px; }
+    .nums { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+    .num { background:#062033; border:1px solid #16466a; border-radius:8px; padding:6px; }
+    .num strong { display:block; font-size:18px; line-height:1.1; color:#fff; }
+    .num em { display:block; font-style:normal; color:var(--muted); font-size:10px; margin-top:2px; }
+    .api { display:flex; flex-wrap:wrap; gap:5px; }
+    .api i { font-style:normal; font-size:11px; border:1px solid #1b4e74; border-radius:999px; padding:3px 8px; color:#d7eefe; background:#041526; }
+    .fine { list-style:none; margin:10px 0 0; padding:0; }
+    .fine li { border-left:1px solid #38bdf8; margin:0 0 0 4px; padding:5px 0 5px 12px; font-size:12.5px; color:#d7eefe; line-height:1.45; }
+    .fine b { color:#fff; }
+    .fine ul { list-style:none; margin:3px 0 0; padding:0; }
+    .fine ul li { border-left-color:#1b4e74; color:#b9d7ea; }
+    table { width:100%; border-collapse:collapse; font-size:12px; margin:6px 0 10px; }
+    th, td { border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+    th { background:#0b3554; color:var(--ice); }
+    .rail { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .rail div { border:1px solid #24638f; background:var(--card); border-radius:10px; padding:8px 10px; font-size:12px; line-height:1.4; color:var(--muted); }
+    .rail strong { display:block; font-size:13px; color:#fff; margin-bottom:2px; }
+    @media (max-width:720px) {
+      .board { grid-template-columns:1fr; }
+      .side { position:static; max-height:none; order:-1; }
+      .split, .rail { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <h1>AG Farmer · मॉडल आर्किटेक्चर</h1>
+    <p>लेयर ऊपर से नीचे। दाईं तरफ चैट की हर सीमा टिकी रहती है। टिक हटाओ तो वह लेयर छिपे।</p>
+    <div class="row">
+      <button type="button" id="zin">ज़ूम +</button>
+      <button type="button" id="zout">ज़ूम −</button>
+      <button type="button" id="zreset">100%</button>
+      <span id="zlab">100%</span>
+      <button type="button" id="full">फुल स्क्रीन</button>
+    </div>
+    <div class="row ticks">
+      <label><input type="checkbox" id="all" checked /> सब टिक</label>
+      <label><input type="checkbox" data-sec="layout" checked /> Layout</label>
+      <label><input type="checkbox" data-sec="router" checked /> Router</label>
+      <label><input type="checkbox" data-sec="models" checked /> मॉडल</label>
+      <label><input type="checkbox" data-sec="limits" checked /> चैट सीमा</label>
+      <label><input type="checkbox" data-sec="live" checked /> Live</label>
+      <label><input type="checkbox" data-sec="api" checked /> API</label>
+      <label><input type="checkbox" data-sec="data" checked /> डेटा</label>
+      <label><input type="checkbox" data-sec="extra" checked /> और चीज़ें</label>
+    </div>
+  </div>
+
+  <div id="stage" class="stage">
+    <div class="board">
+      <div class="sheet">
+        <div data-block="limits">
+          <div class="layer">
+            <h3>L · चैट सीमा, हर प्लान</h3>
+            <div class="rail">
+              <div><strong>मेहमान · 5 चैट</strong>सिर्फ कम मॉडल · Live नहीं</div>
+              <div><strong>₹0 · 80 चैट</strong>मजबूत 0 · याद 0 · आवाज़ 10 जिंदगी · फोटो 10</div>
+              <div><strong>₹99 बंद</strong>याद 0 · अब बिकता नहीं</div>
+              <div><strong>₹299 · 104 चैट</strong>मजबूत 4 · डीप 8/महीना · याद 5 · आवाज़ 20/दिन · फोटो 24</div>
+              <div><strong>₹599 · 166 चैट</strong>मजबूत 6 · डीप 2/दिन · याद 10 · आवाज़ 30/दिन · फोटो 15</div>
+              <div><strong>₹2650 · 330 चैट</strong>मजबूत 30 · डीप 8/दिन · याद 30 · आवाज़ 50 · फोटो 40 · वीडियो 2</div>
+              <div><strong>₹13500 · 3300 चैट</strong>मजबूत 300 · डीप 80/दिन · याद 300 · आवाज़ 500 · फोटो 400 · वीडियो 20</div>
+            </div>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="layout">
+          <div class="layer">
+            <h3>L0 · CLIENT</h3>
+            <div class="nodes">
+              <div class="node"><b>Android</b><span><code>com.agfarmer.app</code> · 1.0.0+7 · minSdk 24 · targetSdk 36 · चौड़ाई 360 पर स्केल 0.78</span></div>
+              <div class="node"><b>Website</b><span>ag-farmer.com · वही API</span></div>
+              <div class="node"><b>Admin</b><span>यूजर, प्लान, चैट सीमा, फसल कैटलॉग, सपोर्ट, नोटिस</span></div>
+            </div>
+            <ul class="fine">
+              <li><b>ऐप खुलने का क्रम</b>
+                <ul>
+                  <li>भाषा चुनो: हिन्दी या English</li>
+                  <li>लॉगिन, रजिस्टर, भूला पासवर्ड, Google, OTP</li>
+                  <li>Google के बाद प्रोफाइल पूरी करो</li>
+                  <li>फिर Main shell के पाँच टैब</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+          <div class="layer">
+            <h3>L0b · APP LAYOUT · हर टैब की छोटी चीज़</h3>
+            <ul class="fine">
+              <li><b>होम</b>
+                <ul>
+                  <li>हेडर, स्वागत, हीरो, “AG Farmer से पूछो”</li>
+                  <li>तीन कार्ड: चैट, कोर्स, जानकारी</li>
+                  <li>मौसम</li>
+                  <li>चालू कोर्स का स्टेज और महीने</li>
+                  <li>टॉपिक चिप चैट में सवाल भेजती है</li>
+                  <li>होम पर जानकारी पोस्ट भी चैट खोलती है</li>
+                </ul>
+              </li>
+              <li><b>चैट स्क्रीन</b>
+                <ul>
+                  <li>इतिहास शीट और नया टॉपिक</li>
+                  <li>नाम वाला सेशन खोलना</li>
+                  <li>बॉक्स 1 से 4 लाइन</li>
+                  <li>बोलकर टाइप करने की शीट</li>
+                  <li>AG Live पिल और बड़ा कैमरा पिल</li>
+                  <li>कैमरा: कैमरा या गैलरी, पत्ती फोटो, भेजने से पहले हटाएँ</li>
+                  <li>इलाज वीडियो बटन</li>
+                  <li>मॉडल बटन: AG High, AG Expert, डीप रिसर्च</li>
+                  <li>जवाब पर सुनो, कॉपी, काम का, बेकार, AI रिपोर्ट</li>
+                  <li>सीमा पूरी हो तो नीचे लॉगिन या अपग्रेड कार्ड</li>
+                  <li>खाली जवाब पर “जवाब अभी नहीं आ पाया। एक बार फिर भेजें.”</li>
+                </ul>
+              </li>
+              <li><b>कोर्स</b>
+                <ul>
+                  <li>फसल कोर्स, कैलेंडर, नया कोर्स, खेत ट्रैक</li>
+                  <li>चैट <code>mode=course</code>, याद प्लान वाली नहीं</li>
+                  <li>दिन का सार संदेश <code>summary_</code></li>
+                  <li>कोर्स से भी आवाज़ और वीडियो</li>
+                  <li>₹299 पर अफीम कोर्स बंद, ₹599 से अफीम खुला</li>
+                </ul>
+              </li>
+              <li><b>जानकारी</b>
+                <ul>
+                  <li>सूची, फसल की फीड, एक लेख, खोज</li>
+                  <li>बोलें = <code>jankari.tts</code>, Live कॉल नहीं</li>
+                </ul>
+              </li>
+              <li><b>प्रोफाइल</b>
+                <ul>
+                  <li>नाम और फोन: अंक और +, ज्यादा से ज्यादा 13</li>
+                  <li>सेव, थीम, लॉगआउट, अकाउंट डिलीट</li>
+                  <li>सब्सक्रिप्शन और मौजूदा प्लान का नाम</li>
+                  <li>लाइव सपोर्ट टिकट</li>
+                  <li>फसल चुनो, चुनी फसल चिप, प्रायोरिटी 2 या कम पर गोल्ड चिप</li>
+                  <li>सुपर पर अफीम लाइव एनालिसिस कार्ड</li>
+                  <li>प्राइवेसी पॉलिसी</li>
+                  <li>एडमिन अनलॉक ₹2999 अलग स्क्रीन</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="router">
+          <div class="layer">
+            <h3>L1 · ROUTER</h3>
+            <div class="node"><b>POST /api</b><span>एक action। <code>api.ag-farmer.com</code> → Node <code>ag-farmer-api</code> → 127.0.0.1:5055</span></div>
+            <ul class="fine">
+              <li><b>चैट रिक्वेस्ट के अंदर</b>
+                <ul>
+                  <li><code>provider</code> gemini या openai। खाली हो तो सर्वर openai</li>
+                  <li><code>deepResearch</code> सच हो और कोटा बचा हो तभी डीप मॉडल</li>
+                  <li><code>mode=course</code> फसल एक्सेस जाँचता है</li>
+                  <li>फोटो हो तो इमेज मॉडल, वरना चैट मॉडल</li>
+                  <li>क्लाइंट 75 सेकंड इंतज़ार करता है</li>
+                  <li><code>chat.sync</code> जवाब नहीं, Firebase लिखना, अक्सर 7–9 सेकंड</li>
+                </ul>
+              </li>
+              <li><b>Live रिक्वेस्ट</b>
+                <ul>
+                  <li><code>voice.realtime.session</code> आवाज़ और वीडियो दोनों</li>
+                  <li><code>mode=video</code> तभी कैमरा फ्रेम</li>
+                  <li>बिना uid 401 <code>login_required</code></li>
+                  <li>एक मिनट में 20 सेशन से ज्यादा नहीं</li>
+                </ul>
+              </li>
+              <li><b>पेमेंट रिक्वेस्ट</b>
+                <ul>
+                  <li>checkout create → Razorpay → checkout verify</li>
+                  <li>subscription create, verify, cancel</li>
+                  <li>क्रेडिट अलग: status, redeem, create</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="models">
+          <div class="layer">
+            <h3>L2 · कौन सा मॉडल</h3>
+            <p class="sub">चैट का परिवार ऐप चुनता है। उसी परिवार में कोटा तय करता है मजबूत, कम, या डीप। नया यूजर AG Expert से शुरू होता है।</p>
+            <div class="split">
+              <div class="col">
+                <h4>AG High · Gemini</h4>
+                <div class="chip"><b>मजबूत चैट</b><br><code>gemini-3.6-flash</code><br>जब strongChat बचा हो</div>
+                <div class="chip"><b>कम चैट</b><br><code>gemini-3.1-flash-lite</code><br>मजबूत कोटा खत्म</div>
+                <div class="chip"><b>डीप</b><br><code>gemini-3.1-pro-preview</code><br>टोकन सीमा 2048</div>
+                <div class="chip"><b>फोटो मजबूत / कम</b><br><code>gemini-3.6-flash</code> / <code>gemini-3.1-flash-lite</code></div>
+              </div>
+              <div class="col">
+                <h4>AG Expert · OpenAI</h4>
+                <div class="chip"><b>मजबूत चैट</b><br><code>gpt-5-mini</code><br>जब strongChat बचा हो</div>
+                <div class="chip"><b>कम चैट</b><br><code>gpt-5-nano</code><br>मजबूत कोटा खत्म</div>
+                <div class="chip"><b>डीप</b><br><code>gpt-4o</code><br>टोकन सीमा 2048</div>
+                <div class="chip"><b>फोटो मजबूत / कम</b><br><code>gpt-5.4-mini</code> / <code>gpt-6-luna</code></div>
+              </div>
+            </div>
+            <ul class="fine">
+              <li><b>फैसला, क्रम से</b>
+                <ul>
+                  <li>Live बटन → चैट मॉडल नहीं, <code>gemini-3.8-live</code> Kore, आउटपुट 8192</li>
+                  <li>जानकारी बोलें → <code>gpt-4o-mini-tts</code> coral</li>
+                  <li>डीप चालू + कोटा → Gemini <code>gemini-3.1-pro-preview</code> या OpenAI <code>gpt-4o</code>, 2048 टोकन</li>
+                  <li>फोटो + मजबूत कोटा बचा → इमेज का मजबूत मॉडल</li>
+                  <li>फोटो + मजबूत खत्म → इमेज का कम मॉडल</li>
+                  <li>साधारण चैट + मजबूत बचा → advanced मॉडल, 1024 टोकन</li>
+                  <li>साधारण चैट + मजबूत खत्म → low मॉडल, 1024 टोकन</li>
+                  <li>मेहमान हमेशा कम मॉडल, 5 चैट</li>
+                  <li>सर्वर पर <code>gpt-realtime</code> alloy है, फोन की AG Live उसे नहीं बुलाती</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="live">
+          <div class="layer">
+            <h3>L3 · LIVE रास्ता</h3>
+            <div class="nodes">
+              <div class="node"><b>1. लॉगिन</b><span>बिना uid टोकन नहीं</span></div>
+              <div class="node"><b>2. टोकन</b><span>चाबी सर्वर पर रहती है</span></div>
+              <div class="node"><b>3. वेबसॉकेट</b><span>अंदर 16 kHz · बाहर 24 kHz</span></div>
+              <div class="node"><b>4. जवाब</b><span>वजह, बीघा, लीटर-पंप, कब, कैसे</span></div>
+            </div>
+            <ul class="fine">
+              <li><b>आवाज़</b>
+                <ul>
+                  <li>सेटअप पूरा होते ही माइक, Android स्रोत mic, बोलने की सीमा औसत 70</li>
+                  <li>अंदर <code>audio/pcm;rate=16000</code>, बाहर PCM 24000</li>
+                  <li>मॉडल बोलते समय माइक बंद, गूँज न हो</li>
+                  <li>खामोशी 1100 ms, प्रीफिक्स 400 ms, END_SENSITIVITY_LOW</li>
+                  <li>अभिवादन “राम-राम किसान भाई”। न सुनाई दे तो कॉल मरी नहीं मानी जाती</li>
+                  <li>बोलते ही ऊपर ड्राफ्ट, लाइन बंद होने पर इतिहास</li>
+                  <li>कट बटन के ऊपर कैप्शन: कॉल काटने से पहले एक बार कृषि विशेषज्ञ से पूछ लें</li>
+                  <li>जवाब में वजह, बीघा, लीटर-पंप, कब, कैसे, एक सावधानी। विशेषज्ञ वाली लाइन जवाब में नहीं</li>
+                </ul>
+              </li>
+              <li><b>वीडियो</b>
+                <ul>
+                  <li>JPEG भुजा 512, क्वालिटी 55, 1 fps</li>
+                  <li>पहली लाइन: फसल की तरफ कैमरा करो। दोबारा नहीं</li>
+                  <li>टर्न में सारी फोटो शामिल: TURN_INCLUDES_ALL_INPUT</li>
+                </ul>
+              </li>
+              <li><b>सीमा और टोकन</b>
+                <ul>
+                  <li><code>LIVE_LIMITS_OFF</code> डिफॉल्ट चालू, लॉग-इन कॉल दैनिक आवाज़/वीडियो सीमा पर नहीं कटती</li>
+                  <li>वापस लगाना हो तो <code>LIVE_LIMITS_OFF=0</code></li>
+                  <li>सीमा बंद हो तो सेशन 60 मिनट। टोकन की नई सेशन सीमा वीडियो 30 और आवाज़ 55 मिनट से कम</li>
+                  <li>कॉन्टेक्स्ट: सुपर/डिस्ट्रीब्यूटर 120000→80000, बाकी 48000→32000</li>
+                  <li>याद की हर लाइन प्रॉम्प्ट में 180 अक्षर</li>
+                  <li>चीरा, लेटेक्स, निकालना नहीं। अफीम और लहसुन मुख्य, बाकी फसल का पूरा जवाब भी</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="api">
+          <div class="layer">
+            <h3>L4 · सारे ACTION</h3>
+            <p class="sub">चैट का असली जवाब <code>chat</code> है। <code>chat.sync</code> सिर्फ Firebase पर पुरानी चैट लिखता है।</p>
+            <div class="api">
+              <i>health</i><i>config</i><i>auth.register</i><i>auth.login</i><i>auth.google</i><i>auth.otp.send</i><i>auth.otp.verify</i><i>auth.password.forgot</i><i>auth.password.reset</i><i>auth.verify</i><i>auth.revoke</i>
+              <i>chat</i><i>chat.sync</i><i>chat.restore</i><i>chat.sessions</i><i>chat.sessions.create</i><i>chat.limits</i><i>ai.quota</i>
+              <i>voice.realtime.session</i>
+              <i>jankari.list</i><i>jankari.meta</i><i>jankari.search</i><i>jankari.tts</i>
+              <i>catalog.plans</i><i>catalog.crops</i><i>catalog.crop</i>
+              <i>billing.checkout.create</i><i>billing.checkout.verify</i><i>billing.subscription.create</i><i>billing.subscription.verify</i><i>billing.subscription.cancel</i>
+              <i>credit.status</i><i>credit.redeem</i><i>credit.create</i>
+              <i>weather.search</i><i>weather.forecast</i>
+              <i>tracks.list</i><i>tracks.save</i><i>tracks.log</i>
+              <i>support.create</i><i>support.mine</i>
+              <i>users.me</i><i>users.me.update</i>
+              <i>storage.upload</i><i>storage.download</i>
+              <i>admin.users</i><i>admin.subscription</i><i>admin.chat.limits.get</i><i>admin.chat.limits.set</i><i>admin.ai.control</i>
+            </div>
+            <ul class="fine">
+              <li><b>auth.*</b> रजिस्टर, लॉगिन, Google, OTP भेजो और जाँचो, पासवर्ड भूलना और रीसेट, सेशन verify और revoke, फोन लुकअप</li>
+              <li><b>chat / chat.sync / chat.restore / chat.sessions*</b> जवाब, Firebase सेव, वापस लाना, सेशन लिस्ट और नया सेशन</li>
+              <li><b>chat.limits / ai.quota</b> बची हुई चैट, मजबूत, डीप, फोटो, आवाज़, वीडियो</li>
+              <li><b>jankari.*</b> सूची, मेटा, खोज, और सिर्फ tts पर आवाज़</li>
+              <li><b>catalog.*</b> प्लान, सारी फसल, एक फसल</li>
+              <li><b>billing.*</b> चेकआउट और सब्सक्रिप्शन बनाना, जाँचना, रद्द करना</li>
+              <li><b>tracks.*</b> खेत लिस्ट, सेव, लॉग, डिलीट</li>
+              <li><b>weather.*</b> जगह खोज और पूर्वानुमान</li>
+              <li><b>support / report</b> टिकट बनाना, मेरे टिकट, AI रिपोर्ट</li>
+              <li><b>users.me</b> प्रोफाइल पढ़ना, अपडेट, डिलीट। notify.token पुश के लिए</li>
+              <li><b>storage.*</b> अपलोड URL, डाउनलोड, लिस्ट, डिलीट</li>
+              <li><b>admin.*</b> यूजर, प्लान सेट, सीमा पढ़ना और लिखना, AI कंट्रोल, सपोर्ट, नोटिस, क्रेडिट लिस्ट, अनलॉक, फसल कैटलॉग</li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="data">
+          <div class="layer">
+            <h3>L5 · डेटा</h3>
+            <ul class="fine">
+              <li><b>Firebase Auth</b> — ईमेल पासवर्ड, Google, OTP। JWT ऐप रखता है।</li>
+              <li><b>users/{uid}</b> — नाम, फोन, प्लान। ईमेल वाली कॉपी भी।</li>
+              <li><b>users/{uid}/ai</b> — मुख्य चैट। एक चैट = सवाल + जवाब = 2 टर्न। स्टोर में 600 संदेश तक, खिड़की सिर्फ प्लान के टर्न।</li>
+              <li><b>याद का नियम</b> — ₹299 पांच, ₹599 दस, ₹2650 तीस, ₹13500 तीन सौ। फ्री और ₹99 शून्य। अक्षर बजट टर्न × 2400। बजट पार हो तो टेक्स्ट कटता है, चैट गिनी नहीं जाती। <code>slice</code> शून्य पर सारी हिस्ट्री नहीं रखता।</li>
+              <li><b>कोर्स थ्रेड</b> — फसल के मौसम की अलग खिड़की, प्लान की याद से बड़ी। फोटो <code>course.jpg</code>। चैट फोटो <code>chat.jpg</code>।</li>
+              <li><b>कोटा फाइल</b> — सर्वर JSON, Firebase से अलग। दिन और 30 दिन का बैंक, जहाँ rollover है।</li>
+              <li><b>Razorpay</b> — सफल verify के बाद प्लान। सीक्रेट सिर्फ सर्वर। वेबहुक सीक्रेट अभी खाली।</li>
+            </ul>
+          </div>
+          <div class="stem">↓</div>
+        </div>
+
+        <div data-block="extra">
+          <div class="layer">
+            <h3>L6 · जो नक्शे में नहीं था</h3>
+            <ul class="fine">
+              <li><b>प्लान खरीद</b>
+                <ul>
+                  <li>तीन चक्र: महीना, 4 महीना (10% कम), साल (25% कम)</li>
+                  <li>कीमत महीने वाली कीमत से गिनी जाती है</li>
+                  <li>क्रेडिट कोड अलग स्क्रीन <code>credit_token_screen</code></li>
+                  <li>वीडियो खोलने पर प्लान शीट: ₹2650 और ऊपर</li>
+                  <li>आवाज़ खोलने पर सिर्फ लॉगिन। दैनिक आवाज़ सीमा अभी टेस्ट पर बंद</li>
+                </ul>
+              </li>
+              <li><b>कोर्स की पाँच स्टेज</b>
+                <ul>
+                  <li>बुवाई</li>
+                  <li>जड़ देखभाल। अफीम में छंटाई</li>
+                  <li>रोग: लहसुन थ्रिप्स और पीलापन, अफीम काली मस्सी और माहू</li>
+                  <li>कंद या डोडा का फुलाव</li>
+                  <li>लहसुन की खुदाई और सुखाना। अफीम के आखिरी स्टेज पर चैट और Live चीरा नहीं सिखाते</li>
+                  <li>अपना कोर्स बनाने की शीट</li>
+                  <li>उदाहरण फोटो कार्ड</li>
+                  <li>हर दिन 12 बजे भारत समय पर एक सार। पुश चैनल <code>ag_course_summary</code></li>
+                  <li>पूरे कोर्स का सार शीट</li>
+                </ul>
+              </li>
+              <li><b>होम और चैट के विजेट</b>
+                <ul>
+                  <li>नोटिस पट्टी</li>
+                  <li>मौसम कार्ड, जगह से</li>
+                  <li>बोलकर सुनने की शीट और आवाज़ मोड पिकर</li>
+                  <li>चैट में तारीख की लकीर, स्वाइप पर समय, टाइपिंग कर्सर</li>
+                  <li>जवाब सुनना फोन की आवाज़ से। लेख का बोलें OpenAI TTS से</li>
+                  <li>जानकारी फोन पर कैश</li>
+                  <li>लाइट और डार्क थीम</li>
+                  <li>भाषा बाद में होम से बदल सकती है</li>
+                </ul>
+              </li>
+              <li><b>सुरक्षा, प्रति मिनट</b>
+                <ul>
+                  <li>गलत लॉगिन 15 मिनट में 5 बार हो तो 24 घंटे ताला</li>
+                  <li>लॉगिन 40, रजिस्टर 20, OTP भेजना 15, चैट 40</li>
+                  <li>Live सेशन 20, फोटो अपलोड 20, लेख की आवाज़ 12, क्रेडिट 10</li>
+                  <li>लॉग-इन यूजर uid से गिना जाता है, सिर्फ IP से नहीं</li>
+                  <li>मेहमान चैट IP पर। लॉगिन के बाद uid पर</li>
+                </ul>
+              </li>
+              <li><b>सर्वर के और हिस्से</b>
+                <ul>
+                  <li>मेल: OTP और पासवर्ड</li>
+                  <li>एडमिन पैनल सपोर्ट टिकट का स्टेटस बदलता है</li>
+                  <li><code>admin.metrics</code> गिनती दिखाता है, चाबी या IP नहीं</li>
+                  <li>नोटिस <code>announcement.list</code></li>
+                  <li>गतिविधि लॉग <code>activity.log</code></li>
+                  <li>वेबसाइट और होस्टिंग अलग फोल्डर, वही API</li>
+                  <li>प्रोसेस सिर्फ <code>ag-farmer-api</code>। AG Live की प्रोसेस अलग है</li>
+                </ul>
+              </li>
+              <li><b>ऐप में चालू नहीं, नक्शे में अब है</b>
+                <ul>
+                  <li>Live की दैनिक सीमा कोड में है, फ्लैग से बंद</li>
+                  <li>Razorpay वेबहुक सीक्रेट खाली</li>
+                  <li>अंग्रेज़ी वीडियो की पहली लाइन पुरानी है। हिन्दी वाली नई है</li>
+                  <li>Play की लिस्टिंग फोन वाली 1.0.0+7 से पुरानी है</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side" data-block="limits">
+        <h2>चैट सीमा</h2>
+        <p class="sub">डिफॉल्ट <code>chat_limits</code>। एडमिन <code>admin.chat.limits.set</code> से बदल सकता है। मजबूत संख्या खत्म होते ही कम मॉडल चलता है। याद अलग गिनती है। बैंक 30 दिन, जहाँ rollover है।</p>
+
+        <div class="card">
+          <div class="top"><b>मेहमान</b><span class="price">बिना लॉगिन</span></div>
+          <div class="nums">
+            <div class="num"><strong>5</strong><em>चैट कुल</em></div>
+            <div class="num"><strong>कम</strong><em>सिर्फ low मॉडल</em></div>
+            <div class="num"><strong>0</strong><em>Live, लॉगिन चाहिए</em></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>मुफ़्त</b><span class="price">₹0 · free</span></div>
+          <div class="nums">
+            <div class="num"><strong>80</strong><em>चैट</em></div>
+            <div class="num"><strong>0</strong><em>मजबूत मॉडल</em></div>
+            <div class="num"><strong>0</strong><em>डीप</em></div>
+            <div class="num"><strong>0</strong><em>याद चैट</em></div>
+            <div class="num"><strong>10</strong><em>आवाज़, जिंदगी</em></div>
+            <div class="num"><strong>10</strong><em>फोटो</em></div>
+            <div class="num"><strong>0</strong><em>वीडियो</em></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>चैट प्लान</b><span class="price">₹99 · बिकता नहीं</span></div>
+          <div class="nums">
+            <div class="num"><strong>0</strong><em>याद</em></div>
+            <div class="num"><strong>—</strong><em>नया सेल बंद</em></div>
+            <div class="num"><strong>local</strong><em>पुराना आईडी</em></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>लहसुन स्पेशल</b><span class="price">₹299 · advanced</span></div>
+          <div class="nums">
+            <div class="num"><strong>104</strong><em>चैट</em></div>
+            <div class="num"><strong>4</strong><em>मजबूत</em></div>
+            <div class="num"><strong>8</strong><em>डीप / महीना</em></div>
+            <div class="num"><strong>5</strong><em>याद चैट</em></div>
+            <div class="num"><strong>20</strong><em>आवाज़ / दिन</em></div>
+            <div class="num"><strong>24</strong><em>फोटो</em></div>
+            <div class="num"><strong>0</strong><em>वीडियो</em></div>
+          </div>
+          <p class="sub">अफीम कोर्स नहीं। बाकी फसल कोर्स हाँ। rollover हाँ।</p>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>अफीम स्पेशल</b><span class="price">₹599 · all</span></div>
+          <div class="nums">
+            <div class="num"><strong>166</strong><em>चैट</em></div>
+            <div class="num"><strong>6</strong><em>मजबूत</em></div>
+            <div class="num"><strong>2</strong><em>डीप / दिन</em></div>
+            <div class="num"><strong>10</strong><em>याद चैट</em></div>
+            <div class="num"><strong>30</strong><em>आवाज़ / दिन</em></div>
+            <div class="num"><strong>15</strong><em>फोटो</em></div>
+            <div class="num"><strong>0</strong><em>वीडियो</em></div>
+          </div>
+          <p class="sub">अफीम सहित सब फसल। rollover हाँ।</p>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>सुपर प्रीमियम</b><span class="price">₹2650 · super</span></div>
+          <div class="nums">
+            <div class="num"><strong>330</strong><em>चैट</em></div>
+            <div class="num"><strong>30</strong><em>मजबूत</em></div>
+            <div class="num"><strong>8</strong><em>डीप / दिन</em></div>
+            <div class="num"><strong>30</strong><em>याद चैट</em></div>
+            <div class="num"><strong>50</strong><em>आवाज़ / दिन</em></div>
+            <div class="num"><strong>40</strong><em>फोटो</em></div>
+            <div class="num"><strong>2</strong><em>वीडियो / दिन</em></div>
+          </div>
+          <p class="sub">Live कॉन्टेक्स्ट 120000 → 80000। rollover हाँ।</p>
+        </div>
+
+        <div class="card">
+          <div class="top"><b>डिस्ट्रीब्यूटर प्रो</b><span class="price">₹13500</span></div>
+          <div class="nums">
+            <div class="num"><strong>3300</strong><em>चैट</em></div>
+            <div class="num"><strong>300</strong><em>मजबूत</em></div>
+            <div class="num"><strong>80</strong><em>डीप / दिन</em></div>
+            <div class="num"><strong>300</strong><em>याद चैट</em></div>
+            <div class="num"><strong>500</strong><em>आवाज़ / दिन</em></div>
+            <div class="num"><strong>400</strong><em>फोटो</em></div>
+            <div class="num"><strong>20</strong><em>वीडियो / दिन</em></div>
+          </div>
+          <p class="sub">याद की हर लाइन Live प्रॉम्प्ट में 180 अक्षर। अक्षर बजट = टर्न × 2400। एडमिन अनलॉक अलग ₹2999।</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <script>
+    const stage = document.getElementById('stage');
+    const zlab = document.getElementById('zlab');
+    const all = document.getElementById('all');
+    const boxes = [...document.querySelectorAll('input[data-sec]')];
+    let z = 1;
+    function paintZoom() {
+      stage.style.zoom = String(z);
+      zlab.textContent = Math.round(z * 100) + '%';
+    }
+    document.getElementById('zin').onclick = () => { z = Math.min(2.2, Math.round((z + 0.1) * 10) / 10); paintZoom(); };
+    document.getElementById('zout').onclick = () => { z = Math.max(0.5, Math.round((z - 0.1) * 10) / 10); paintZoom(); };
+    document.getElementById('zreset').onclick = () => { z = 1; paintZoom(); };
+    document.getElementById('full').onclick = () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    };
+    function apply() {
+      const on = new Set(boxes.filter((b) => b.checked).map((b) => b.dataset.sec));
+      document.querySelectorAll('[data-block]').forEach((el) => { el.hidden = !on.has(el.dataset.block); });
+      all.checked = boxes.every((b) => b.checked);
+    }
+    all.onchange = () => { boxes.forEach((b) => { b.checked = all.checked; }); apply(); };
+    boxes.forEach((b) => { b.onchange = apply; });
+  </script>
+</body>
+</html>
