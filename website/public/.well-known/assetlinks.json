@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.agfarmer.app",
+      "sha256_cert_fingerprints": [
+        "EF:A5:3B:8D:E9:67:D3:1B:B2:E1:89:DB:1C:1B:7E:C7:71:CD:4A:C9:7F:C8:05:44:29:A3:6F:F4:2E:D9:C0:57",
+        "B9:BB:FA:26:50:FB:CF:F0:29:30:7F:22:21:BA:67:71:1E:DB:4F:35:4C:34:40:1F:2B:B6:04:BD:59:62:98:BE"
+      ]
+    }
+  }
+]
