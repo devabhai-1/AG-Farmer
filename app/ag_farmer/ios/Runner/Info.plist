@@ -66,5 +66,17 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>FacebookAppID</key>
+	<string>29945895098345406</string>
+	<key>FacebookClientToken</key>
+	<string>7cdf454c5dd111ca831270d4fb21944f</string>
+	<key>FacebookDisplayName</key>
+	<string>AG Farmer</string>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<true/>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<true/>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier will be used to deliver personalized agricultural recommendations and analyze campaign performance.</string>
 </dict>
 </plist>
