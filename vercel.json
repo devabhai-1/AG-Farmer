@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd website && npm install && npm run build",
+  "outputDirectory": "website/dist",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/((?!privacy-policy|terms-and-conditions|terms-conditions|contact-us|account-deletion|legal|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
